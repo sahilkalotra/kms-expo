@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Course Content</title>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --fg: #0f172a;
+        --muted: #475569;
+        --card: #ffffff;
+        --border: rgba(2, 6, 23, 0.08);
+        --accent: #2563eb;
+        --shadow: 0 14px 30px rgba(2, 6, 23, 0.08);
+      }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial;
+        background: var(--bg);
+        color: var(--fg);
+      }
+      .wrap {
+        padding: 18px;
+      }
+      .card {
+        border: 1px solid var(--border);
+        background: var(--card);
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+      }
+      .hero {
+        height: 180px;
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(2, 6, 23, 0.06));
+        position: relative;
+      }
+      .hero img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
+      }
+      .hero .fallback {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(2, 6, 23, 0.55);
+        font-weight: 600;
+        letter-spacing: 0.2px;
+      }
+      .contentWrap {
+        padding: 14px 14px 16px 14px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 22px;
+        line-height: 1.25;
+      }
+      .metaRow {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: 10px;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .content {
+        margin-top: 12px;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .chip {
+        display: inline-block;
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: rgba(2, 6, 23, 0.02);
+        color: rgba(2, 6, 23, 0.82);
+      }
+      .chip.primary {
+        border-color: rgba(37, 99, 235, 0.25);
+        background: rgba(37, 99, 235, 0.10);
+        color: #1e40af;
+      }
+      .section {
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+      }
+      .sectionTitle {
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        color: rgba(2, 6, 23, 0.85);
+        margin-bottom: 8px;
+      }
+      ul {
+        margin: 0;
+        padding-left: 18px;
+        color: rgba(2, 6, 23, 0.78);
+        line-height: 1.55;
+        font-size: 13.5px;
+      }
+      li { margin-bottom: 6px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <div class="hero">
+          <img id="thumb" alt="Course thumbnail" />
+          <div class="fallback" id="thumbFallback">Course preview</div>
+        </div>
+        <div class="contentWrap">
+          <h1 id="title">Loading…</h1>
+          <div class="metaRow">
+            <span class="chip" id="instructor">Waiting for native data…</span>
+            <span class="chip primary" id="price" style="display:none;"></span>
+            <span class="chip" id="badge" style="display:none;">From native app</span>
+          </div>
+          <div class="content" id="desc"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function setText(id, text) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = text || "";
+      }
+
+      function setThumb(url) {
+        var img = document.getElementById("thumb");
+        var fallback = document.getElementById("thumbFallback");
+        if (!img || !fallback) return;
+        if (!url || typeof url !== "string") {
+          img.style.display = "none";
+          fallback.style.display = "flex";
+          return;
+        }
+        img.src = url;
+        img.onload = function () {
+          img.style.display = "block";
+          fallback.style.display = "none";
+        };
+        img.onerror = function () {
+          img.style.display = "none";
+          fallback.style.display = "flex";
+        };
+      }
+
+      window.renderCourse = function (courseJson) {
+        try {
+          var course = typeof courseJson === "string" ? JSON.parse(courseJson) : courseJson;
+          setText("title", course.title || "Course");
+          setText("instructor", (course.instructor && course.instructor.name) || "Unknown instructor");
+          setText("desc", course.description || "No description provided.");
+          setThumb(course.thumbnailUrl || course.thumbnail || (course.images && course.images[0]));
+
+          var price = document.getElementById("price");
+          if (price && typeof course.price === "number") {
+            price.style.display = "inline-block";
+            price.textContent = "₹" + course.price;
+          }
+
+          document.getElementById("badge").style.display = "inline-block";
+        } catch (e) {
+          setText("title", "Failed to render content");
+          setText("desc", String(e && e.message ? e.message : e));
+        }
+      };
+    </script>
+  </body>
+</html>
+
