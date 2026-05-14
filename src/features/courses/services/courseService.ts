@@ -1,8 +1,8 @@
 import { apiClient } from '@/src/core/api/singleton';
 import type { ApiResult } from '@/src/core/api/types';
-import type { Course, Instructor } from '@/src/features/courses/types';
 import { storageGet, storageSet } from '@/src/core/storage/appStorage';
 import { COURSE_KEYS } from '@/src/features/courses/storageKeys';
+import type { Course, Instructor } from '@/src/features/courses/types';
 
 type FreeApiListEnvelope<T> = {
   data?: {
@@ -96,8 +96,8 @@ export async function fetchCourses(params?: {
       : [{ id: '0', name: 'Unknown instructor' }];
 
   const courses: Course[] = products.map((p, idx) => {
-    const instructor = instructors[idx % instructors.length]!;
-    const id = String(p.id ?? idx);
+    const instructor = instructors[idx % instructors.length]!; 
+   const id = String(p.id ?? idx);
     return {
       id,
       title: p.title ?? `Course ${id}`,

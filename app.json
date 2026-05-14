@@ -37,7 +37,34 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "expo-asset"
+      "expo-asset",
+      [
+        "@howincodes/expo-dynamic-app-icon",
+        {
+          "classic": {
+            "ios": "./assets/app-icons/variant_classic.png",
+            "android": {
+              "foregroundImage": "./assets/images/adaptive-icon.png",
+              "backgroundColor": "#ffffff"
+            }
+          },
+          "cobalt": {
+            "ios": "./assets/app-icons/variant_cobalt.png",
+            "android": {
+              "foregroundImage": "./assets/images/adaptive-icon.png",
+              "backgroundColor": "#2563eb"
+            }
+          },
+          "charcoal": {
+            "ios": "./assets/app-icons/variant_charcoal.png",
+            "android": {
+              "foregroundImage": "./assets/images/adaptive-icon.png",
+              "backgroundColor": "#18181b"
+            }
+          }
+        }
+      ],
+      "@sentry/react-native"
     ],
     "experiments": {
       "typedRoutes": true

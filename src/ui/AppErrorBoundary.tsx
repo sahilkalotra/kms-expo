@@ -1,3 +1,4 @@
+import { logError } from '@/src/telemetry/logSentryError';
 import React from 'react';
 import { DevSettings, Text, View } from 'react-native';
 
@@ -15,8 +16,8 @@ export class AppErrorBoundary extends React.Component<{ children: React.ReactNod
 
   componentDidCatch(error: any) {
     this.setState({ stack: typeof error?.stack === 'string' ? error.stack : undefined });
-    // Keep it simple: console log is useful during evaluation.
     console.error('[ErrorBoundary]', error);
+    logError(error, { source: 'AppErrorBoundary' });
   }
 
   render() {

@@ -1,14 +1,37 @@
 import * as Notifications from 'expo-notifications';
 
+import { EXAMPLE_LOCAL_NOTIFICATION_ID } from '@/src/features/notifications/notificationIds';
+import { canShowNotification } from '@/src/features/notifications/notificationPause';
+
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
-  }),
+  handleNotification: async () => {
+    const paused = !(await canShowNotification());
+    if (paused) {
+      return {
+        shouldShowAlert: false,
+        shouldShowBanner: false,
+        shouldShowList: false,
+        shouldPlaySound: false,
+        shouldSetBadge: false,
+      };
+    }
+    return {
+      shouldShowAlert: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+    };
+  },
 });
+
+export async function cancelScheduledNotification(identifier: string): Promise<void> {
+  try {
+    await Notifications.cancelScheduledNotificationAsync(identifier);
+  } catch {
+    // ignore missing id / platform quirks
+  }
+}
 
 export async function ensureNotificationsPermission(): Promise<boolean> {
   const settings = await Notifications.getPermissionsAsync();
@@ -18,6 +41,7 @@ export async function ensureNotificationsPermission(): Promise<boolean> {
 }
 
 export async function sendLocalNotification(params: { title: string; body: string; data?: Record<string, any> }) {
+  if (!(await canShowNotification())) return;
   const ok = await ensureNotificationsPermission();
   if (!ok) return;
   await Notifications.scheduleNotificationAsync({
@@ -37,6 +61,8 @@ export async function scheduleNotification(params: {
   secondsFromNow: number;
   data?: Record<string, any>;
 }) {
+  if (!(await canShowNotification())) return;
+
   const ok = await ensureNotificationsPermission();
   if (!ok) return;
 
@@ -62,3 +88,16 @@ export async function scheduleNotification(params: {
   });
 }
 
+/**
+ * Example scheduled local notification. Uses `scheduleNotification`, so it respects
+ * `canShowNotification()` / pause state the same as production reminders.
+ */
+export async function scheduleExampleReminderInSeconds(seconds: number): Promise<void> {
+  await scheduleNotification({
+    identifier: EXAMPLE_LOCAL_NOTIFICATION_ID,
+    title: 'Example reminder',
+    body: 'This sample notification respects your pause settings.',
+    secondsFromNow: seconds,
+    data: { type: 'example_local' },
+  });
+}

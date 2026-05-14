@@ -1,24 +1,29 @@
 import '@/global.css';
 
+import * as Sentry from '@sentry/react-native';
 import { Slot } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import { Platform } from 'react-native';
 import { useColorScheme } from 'nativewind';
+import { useEffect } from 'react';
 
-import { AppErrorBoundary } from '@/src/ui/AppErrorBoundary';
-import { OfflineBanner } from '@/src/ui/OfflineBanner';
+import { useAppForegroundReschedule } from '@/src/features/app/useAppForegroundReschedule';
 import { AuthProvider } from '@/src/features/auth/providers/AuthProvider';
-import { ThemeProvider } from '@/src/theme/ThemeProvider';
-import { trackAppOpened } from '@/src/features/notifications/services/reengagement';
 import { BookmarksProvider } from '@/src/features/courses/providers/BookmarksProvider';
 import { EnrollmentProvider } from '@/src/features/courses/providers/EnrollmentProvider';
+import { trackAppOpened } from '@/src/features/notifications/services/reengagement';
+import { initSentry } from '@/src/telemetry/sentry';
+import { ThemeProvider } from '@/src/theme/ThemeProvider';
+import { AppErrorBoundary } from '@/src/ui/AppErrorBoundary';
+import { OfflineBanner } from '@/src/ui/OfflineBanner';
 
-export default function RootLayout() {
+initSentry();
+
+function RootLayout() {
   const { colorScheme } = useColorScheme();
+  useAppForegroundReschedule();
+
   useEffect(() => {
     trackAppOpened().catch(() => {
-      // best effort
     });
   }, []);
 
@@ -38,4 +43,6 @@ export default function RootLayout() {
     </AppErrorBoundary>
   );
 }
+
+export default Sentry.wrap(RootLayout);
 
